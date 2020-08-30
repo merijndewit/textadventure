@@ -5,17 +5,23 @@ namespace Zuul
 	public class Game
 	{
 		private Parser parser;
-		private Room currentRoom;
+		public static Room currentRoom;
+		public Player Pl;
+		public float playerHealth;
+		public static string descRoom;
 
-		public Game ()
+		public Game()
 		{
 			createRooms();
+			
 			parser = new Parser();
+			
+
 		}
 
-		private void createRooms()
+		public void createRooms()
 		{
-			Room outside, theatre, pub, lab, office;
+			Room outside, theatre, pub, lab, office, theatreUp, theatreDown, labDown;
 
 			// create the rooms
 			outside = new Room("outside the main entrance of the university");
@@ -23,6 +29,9 @@ namespace Zuul
 			pub = new Room("in the campus pub");
 			lab = new Room("in a computing lab");
 			office = new Room("in the computing admin office");
+			labDown = new Room("you're in the basement of the lab");
+			theatreUp = new Room("");
+			theatreDown = new Room("");
 
 			// initialise room exits
 			outside.setExit("east", theatre);
@@ -30,15 +39,23 @@ namespace Zuul
 			outside.setExit("west", pub);
 
 			theatre.setExit("west", outside);
+			theatre.setExit("up", theatreUp);
+			theatre.setExit("down", theatreDown);
 
 			pub.setExit("east", outside);
 
 			lab.setExit("north", outside);
 			lab.setExit("east", office);
+			lab.setExit("down", labDown);
 
 			office.setExit("west", lab);
 
+			theatreDown.setExit("up", theatre);
+			theatreUp.setExit("down", theatre);
+			labDown.setExit("up", lab);
+
 			currentRoom = outside;  // start game outside
+		
 		}
 
 
@@ -52,7 +69,8 @@ namespace Zuul
 			// Enter the main command loop.  Here we repeatedly read commands and
 			// execute them until the game is over.
 			bool finished = false;
-			while (! finished) {
+			while (!finished)
+			{
 				Command command = parser.getCommand();
 				finished = processCommand(command);
 			}
@@ -81,13 +99,15 @@ namespace Zuul
 		{
 			bool wantToQuit = false;
 
-			if(command.isUnknown()) {
+			if (command.isUnknown())
+			{
 				Console.WriteLine("I don't know what you mean...");
 				return false;
 			}
 
 			string commandWord = command.getCommandWord();
-			switch (commandWord) {
+			switch (commandWord)
+			{
 				case "help":
 					printHelp();
 					break;
@@ -97,6 +117,25 @@ namespace Zuul
 				case "quit":
 					wantToQuit = true;
 					break;
+				case "look":
+					printLook();
+					break;
+				case "search":
+					printSearch();
+					break;
+				case "inventory":
+					printInventory();
+					break;
+				case "grab":
+					getItem();
+					break;
+				case "drop":
+					drop(command);
+					break;
+				case "use":
+					use(command);
+					break;
+			
 			}
 
 			return wantToQuit;
@@ -116,6 +155,26 @@ namespace Zuul
 			Console.WriteLine();
 			Console.WriteLine("Your command words are:");
 			parser.showCommands();
+			
+		}
+		public void printLook()
+		{
+			getCurrentRoomDescription();
+			Console.WriteLine(currentRoom.getLongDescription());
+			Console.WriteLine();
+			Console.WriteLine(Player.health);
+			
+		}
+
+		public void printSearch()
+		{
+			getCurrentRoomDescription();
+			Currentroom.getCurrentRoomItems();
+			Currentroom.useItems();
+		}
+		public void printInventory()
+		{
+			Inventory.makeInventory();
 		}
 
 		/**
@@ -124,24 +183,77 @@ namespace Zuul
 	     */
 		private void goRoom(Command command)
 		{
-			if(!command.hasSecondWord()) {
+			if (!command.hasSecondWord())
+			{
 				// if there is no second word, we don't know where to go...
 				Console.WriteLine("Go where?");
+
 				return;
 			}
 
 			string direction = command.getSecondWord();
+			string levels = command.getThirdWord();
 
 			// Try to leave current room.
 			Room nextRoom = currentRoom.getExit(direction);
 
-			if (nextRoom == null) {
-				Console.WriteLine("There is no door to "+direction+"!");
-			} else {
+			if (nextRoom == null)
+			{
+				Console.WriteLine("There is no door to " + direction + "!");
+			}
+			else
+			{
 				currentRoom = nextRoom;
 				Console.WriteLine(currentRoom.getLongDescription());
 			}
 		}
+		public static void getCurrentRoomDescription()
+		{
+			descRoom = currentRoom.getShortDescription();
+		}
 
+		public static void getItem()
+		{
+			
+
+		}
+
+		public static void use(Command command)
+		{
+			
+			string useItem = command.getSecondWord();
+
+			if (useItem == "lantern")
+			{
+				Items.lantern = true;
+			}
+		}
+
+
+		public static void drop(Command command)
+		{
+			string dropItem = command.getSecondWord();
+
+			if (dropItem == "inv1")
+			{
+				Inventory.inv1 = null;
+			}
+			else if(dropItem == "inv2")
+			{
+				Inventory.inv2 = null;
+			}
+			else if (dropItem == "inv3")
+			{
+				Inventory.inv3 = null;
+			}
+			else if (dropItem == "inv4")
+			{
+				Inventory.inv4 = null;
+			}
+			else if (dropItem == "inv5")
+			{
+				Inventory.inv5 = null;
+			}
+		}
 	}
 }

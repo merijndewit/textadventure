@@ -59,8 +59,10 @@ namespace Zuul
 
 			// because `exits` is a Dictionary, we can't use a `for` loop
 			int commas = 0;
-			foreach (string key in exits.Keys) {
-				if (commas != 0 && commas != exits.Count) {
+			foreach (string key in exits.Keys)
+			{
+				if (commas != 0 && commas != exits.Count)
+				{
 					returnstring += ",";
 				}
 				commas++;
@@ -75,9 +77,12 @@ namespace Zuul
 	     */
 		public Room getExit(string direction)
 		{
-			if (exits.ContainsKey(direction)) {
+			if (exits.ContainsKey(direction))
+			{
 				return (Room)exits[direction];
-			} else {
+			}
+			else
+			{
 				return null;
 			}
 
